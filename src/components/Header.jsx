@@ -1,26 +1,38 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { StHeader, MemberButtons, MemberBtn } from "./StyleComponents";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { karina, winter, giselle, ningning } from "redux/modules/member";
+import { useDispatch, useSelector } from "react-redux";
+import { setMember } from "redux/modules/member";
+import { useNavigate } from "react-router-dom";
+import MainContext from "context/MainContext";
 
 function Header() {
-  const [selectedMember, setSelectedMember] = useState("");
+  const navigate = useNavigate();
+  const members = useSelector((state) => state.member);
+  const { selectedMember, setSelectedMember } = useContext(MainContext);
 
   useEffect(() => {
-    setSelectedMember("카리나");
+    setSelectedMember(members.member);
   }, []);
 
   const dispatch = useDispatch();
   return (
     <>
+      <button>내프로필</button>
+      <button
+        onClick={() => {
+          navigate("/");
+        }}
+      >
+        로그아웃
+      </button>
       <StHeader>
         <h1>Artist FanLetter</h1>
         <MemberButtons>
           <MemberBtn
             isSelected={selectedMember === "카리나"}
             onClick={() => {
-              dispatch(karina());
+              dispatch(setMember("카리나"));
               setSelectedMember("카리나");
             }}
           >
@@ -29,7 +41,7 @@ function Header() {
           <MemberBtn
             isSelected={selectedMember === "윈터"}
             onClick={() => {
-              dispatch(winter());
+              dispatch(setMember("윈터"));
               setSelectedMember("윈터");
             }}
           >
@@ -38,7 +50,7 @@ function Header() {
           <MemberBtn
             isSelected={selectedMember === "지젤"}
             onClick={() => {
-              dispatch(giselle());
+              dispatch(setMember("지젤"));
               setSelectedMember("지젤");
             }}
           >
@@ -47,7 +59,7 @@ function Header() {
           <MemberBtn
             isSelected={selectedMember === "닝닝"}
             onClick={() => {
-              dispatch(ningning());
+              dispatch(setMember("닝닝"));
               setSelectedMember("닝닝");
             }}
           >

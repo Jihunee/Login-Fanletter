@@ -41,7 +41,7 @@ export default function Form() {
               nickname,
               content,
               writedTo: inputMember,
-              createdAt: new Date().toLocaleDateString(),
+              createdAt: new Date(),
               avatar: null,
             };
             setLetter([newletter, ...letter]);

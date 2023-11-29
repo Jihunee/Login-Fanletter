@@ -15,7 +15,7 @@ import defaultpng from "assts/default.png";
 
 export default function LetterList() {
   const members = useSelector((state) => state.member);
-  const { letter } = useContext(MainContext);
+  const { letter, selectedMember } = useContext(MainContext);
   const lettersMember = letter.filter(
     (letters) => letters.writedTo === members.member
   );

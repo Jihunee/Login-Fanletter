@@ -15,29 +15,23 @@ import {
 import { useState } from "react";
 import defaultpng from "assts/default.png";
 
-function Detail() {
-  const getData = localStorage.getItem("letters");
-  const result = JSON.parse(getData);
-  const params = useParams();
+function Detail({ letter, setLetter }) {
+  const params = useParams().id;
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
-
-  const [letter, setLetter] = useState(result);
-
-  localStorage.setItem("letters2", JSON.stringify(letter));
+  const [editingText, setEditingText] = useState("");
 
   const foundData = letter.find((item) => {
-    return item.id === params.id;
+    return item.id === params;
   });
 
   const { nickname, writedTo, createdAt, content, avatar } = foundData;
-  const [editingText, setEditingText] = useState(content);
 
   return (
     <div>
       <HomeBtn
         onClick={() => {
-          navigate("/");
+          navigate("/Home");
         }}
       >
         홈으로
@@ -63,13 +57,12 @@ function Detail() {
         {isEditing ? (
           <EditTextBox
             defaultValue={content}
-            value={editingText}
             onChange={(e) => {
               setEditingText(e.target.value);
             }}
           />
         ) : (
-          <TextBox>{editingText}</TextBox>
+          <TextBox>{content}</TextBox>
         )}
         <CardBtn>
           {isEditing ? (
@@ -80,16 +73,15 @@ function Detail() {
                 const answer = window.confirm("이대로 수정하시겠습니까?");
                 if (!answer) return;
 
-                const editingBox = result.map((item) => {
-                  if (item.id === params.id) {
-                    item.content = editingText;
+                const newLetter = letter.map((item) => {
+                  if (item.id === params) {
+                    return { ...item, content: editingText };
+                  } else {
+                    return item;
                   }
-                  return item;
                 });
-                localStorage.setItem("letters", JSON.stringify(editingBox));
-                localStorage.setItem("letters2", JSON.stringify(editingBox));
-
-                navigate("/");
+                navigate("/Home");
+                setLetter(newLetter);
               }}
             >
               수정완료
@@ -108,12 +100,12 @@ function Detail() {
                   const answer = window.confirm("정말로 삭제하시겠습니까?");
                   if (!answer) return;
 
-                  const resultdata2 = result.filter(
-                    (item) => item.id !== params.id
+                  const filterdeData = letter.filter(
+                    (item) => item.id !== params
                   );
-                  localStorage.setItem("letters2", JSON.stringify(resultdata2));
+                  setLetter(filterdeData);
 
-                  navigate("/");
+                  navigate("/Home");
                 }}
               >
                 삭제
