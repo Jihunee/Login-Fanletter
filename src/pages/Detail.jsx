@@ -11,15 +11,18 @@ import {
   EditTextBox,
   CardBtn,
   DetailAvatarImg,
-} from "components/StyleComponents";
+} from "styledComponents/StyleComponents";
 import { useState } from "react";
-import defaultpng from "assts/default.png";
+import testjpg from "assts/test.jpg";
+import { useSelector } from "react-redux";
+import axios from "axios";
 
 function Detail({ letter, setLetter }) {
   const params = useParams().id;
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [editingText, setEditingText] = useState("");
+  const userId = localStorage.getItem("userId");
 
   const foundData = letter.find((item) => {
     return item.id === params;
@@ -27,11 +30,37 @@ function Detail({ letter, setLetter }) {
 
   const { nickname, writedTo, createdAt, content, avatar } = foundData;
 
+  // const idInformation = localStorage.getItem("아이디 정보");
+  // const idResponse = JSON.parse(idInformation);
+  // const idData = idResponse.data;
+
+  const removeLetterHandelr = (id) => {
+    axios.delete(`${process.env.REACT_APP_SERVER_URL}/letters/${id}`);
+    const filterdeData = letter.filter((item) => {
+      return item.id !== id;
+    });
+    setLetter(filterdeData);
+  };
+
+  const editLetterHandler = async () => {
+    axios.patch(`${process.env.REACT_APP_SERVER_URL}/letters/${params}`, {
+      content: editingText,
+    });
+    const newLetter = letter.map((item) => {
+      if (item.id === params) {
+        return { ...item, content: editingText };
+      } else {
+        return item;
+      }
+    });
+    setLetter(newLetter);
+  };
+
   return (
     <div>
       <HomeBtn
         onClick={() => {
-          navigate("/Home");
+          navigate("/");
         }}
       >
         홈으로
@@ -39,7 +68,7 @@ function Detail({ letter, setLetter }) {
       <CardBox>
         <CardBoxTop>
           <DetailAvatarImg>
-            <img src={avatar ?? defaultpng} />
+            <img src={avatar ?? testjpg} />
           </DetailAvatarImg>
           <NickName>{nickname}</NickName>
           <Time>
@@ -64,55 +93,53 @@ function Detail({ letter, setLetter }) {
         ) : (
           <TextBox>{content}</TextBox>
         )}
-        <CardBtn>
-          {isEditing ? (
-            <StBtn
-              onClick={() => {
-                if (!editingText) return alert("수정된 부분이 없습니다.");
-                setIsEditing(false);
-                const answer = window.confirm("이대로 수정하시겠습니까?");
-                if (!answer) return;
 
-                const newLetter = letter.map((item) => {
-                  if (item.id === params) {
-                    return { ...item, content: editingText };
-                  } else {
-                    return item;
-                  }
-                });
-                navigate("/Home");
-                setLetter(newLetter);
-              }}
-            >
-              수정완료
-            </StBtn>
-          ) : (
-            <>
-              <StBtn
-                onClick={() => {
-                  setIsEditing(true);
-                }}
-              >
-                수정
-              </StBtn>
-              <StBtn
-                onClick={() => {
-                  const answer = window.confirm("정말로 삭제하시겠습니까?");
-                  if (!answer) return;
+        <>
+          <CardBtn>
+            {userId === foundData.userId ? (
+              <>
+                {isEditing ? (
+                  <StBtn
+                    onClick={() => {
+                      if (!editingText) return alert("수정된 부분이 없습니다.");
+                      setIsEditing(false);
+                      const answer = window.confirm("이대로 수정하시겠습니까?");
+                      if (!answer) return;
 
-                  const filterdeData = letter.filter(
-                    (item) => item.id !== params
-                  );
-                  setLetter(filterdeData);
+                      editLetterHandler();
+                      navigate("/");
+                    }}
+                  >
+                    수정완료
+                  </StBtn>
+                ) : (
+                  <>
+                    <StBtn
+                      onClick={() => {
+                        setIsEditing(true);
+                      }}
+                    >
+                      수정
+                    </StBtn>
+                    <StBtn
+                      onClick={() => {
+                        const answer =
+                          window.confirm("정말로 삭제하시겠습니까?");
+                        if (!answer) return;
 
-                  navigate("/Home");
-                }}
-              >
-                삭제
-              </StBtn>
-            </>
-          )}
-        </CardBtn>
+                        removeLetterHandelr(params);
+
+                        navigate("/");
+                      }}
+                    >
+                      삭제
+                    </StBtn>
+                  </>
+                )}
+              </>
+            ) : null}
+          </CardBtn>
+        </>
       </CardBox>
     </div>
   );

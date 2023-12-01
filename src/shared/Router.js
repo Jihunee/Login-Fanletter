@@ -2,25 +2,47 @@ import Detail from "pages/Detail";
 import Home from "pages/Home";
 import Login from "pages/Login";
 import Profile from "pages/Profile";
-import { fanletter } from "./data";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { useState } from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useSelector } from "react-redux";
 
 const Router = () => {
-  const [letter, setLetter] = useState(fanletter);
+  const [letter, setLetter] = useState(null);
+
+  const fetchLetters = async () => {
+    const { data } = await axios.get(
+      `${process.env.REACT_APP_SERVER_URL}/letters`
+    );
+    setLetter(data);
+  };
+
+  useEffect(() => {
+    fetchLetters();
+  }, []);
+
+  const auth = useSelector((state) => state.auth);
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route
-          path="/Home"
-          element={<Home letter={letter} setLetter={setLetter} />}
-        />
-        <Route path="/Profile/:id" element={<Profile />} />
-        <Route
-          path="/Detail/:id"
-          element={<Detail letter={letter} setLetter={setLetter} />}
-        />
+        <Route path="/login" element={<Login />} />
+        {auth ? (
+          <>
+            <Route
+              path="/"
+              element={<Home letter={letter} setLetter={setLetter} />}
+            />
+            <Route
+              path="/profile/"
+              element={<Profile letter={letter} setLetter={setLetter} />}
+            />
+            <Route
+              path="/detail/:id"
+              element={<Detail letter={letter} setLetter={setLetter} />}
+            />
+          </>
+        ) : null}
+        <Route path="*" element={<Navigate replace to="/login" />} />
       </Routes>
     </BrowserRouter>
   );

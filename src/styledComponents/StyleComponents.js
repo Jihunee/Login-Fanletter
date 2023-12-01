@@ -7,7 +7,7 @@ export const StHeader = styled.header`
   align-items: center;
   flex-direction: column;
   font-size: 60px;
-  margin-bottom: 20px;
+
   color: saddlebrown;
   font-family: "Cafe24";
 `;
@@ -34,6 +34,7 @@ export const StBtn = styled.button`
   color: white;
   font-family: "Cafe24";
   transition: all 0.2s ease-in-out;
+  margin-right: 10px;
   &:hover {
     background-color: white;
     color: salmon;
@@ -94,6 +95,10 @@ export const Stinputbox = styled.div`
   text-align: center;
   gap: 10px;
   width: 400px;
+  & p {
+    font-size: 30px;
+    color: salmon;
+  }
 `;
 
 export const Stinput = styled.input`

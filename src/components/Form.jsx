@@ -3,13 +3,15 @@ import uuid from "react-uuid";
 import {
   Stform,
   Stinputbox,
-  Stinput,
   Sttextarea,
   Stselect,
   StaddBtnbox,
   StBtn,
-} from "./StyleComponents";
+} from "../styledComponents/StyleComponents";
 import MainContext from "context/MainContext";
+
+import testjpg from "assts/test.jpg";
+import axios from "axios";
 
 export default function Form() {
   const {
@@ -17,11 +19,21 @@ export default function Form() {
     setInputMember,
     content,
     setContent,
-    nickname,
     setNickName,
     letter,
     setLetter,
   } = useContext(MainContext);
+
+  const nickname = localStorage.getItem("nickname");
+  const userId = localStorage.getItem("userId");
+  const avatar = localStorage.getItem("avatar");
+
+  const addLetter = async (newletter) => {
+    axios.post(`${process.env.REACT_APP_SERVER_URL}/letters`, newletter);
+    setLetter([newletter, ...letter]);
+    setNickName("");
+    setContent("");
+  };
 
   return (
     <>
@@ -29,37 +41,25 @@ export default function Form() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (nickname === "") {
-              alert("닉네임을 입력해주세요");
-              return false;
-            } else if (content === "") {
+            if (content === "") {
               alert("내용을 입력해주세요");
               return false;
             }
             const newletter = {
               id: uuid(),
-              nickname,
+              nickname: nickname,
               content,
               writedTo: inputMember,
               createdAt: new Date(),
-              avatar: null,
+              avatar: avatar === "null" ? testjpg : avatar,
+              userId: userId,
             };
-            setLetter([newletter, ...letter]);
-            setNickName("");
-            setContent("");
+            addLetter(newletter);
           }}
         >
           <Stinputbox>
             닉네임
-            <Stinput
-              type="text"
-              value={nickname}
-              onChange={(e) => {
-                setNickName(e.target.value);
-              }}
-              placeholder="최대 20글자까지 작성 할 수 있습니다."
-              maxLength={20}
-            />
+            <p>{nickname}</p>
             내 용
             <Sttextarea
               type="text"

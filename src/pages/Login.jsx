@@ -1,24 +1,16 @@
 import axios from "axios";
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
-
-const Warpper = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-`;
-const LoginBox = styled.div`
-  border: 1px solid red;
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-`;
-const InputBox = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
+import { signUp } from "redux/modules/auth";
+import { signIn } from "redux/modules/user";
+import {
+  Warpper,
+  LoginBox,
+  LoginTitle,
+  InputBox,
+  Button,
+} from "styledComponents/loginStyled";
 
 function Login() {
   const [inputId, setInputId] = useState("");
@@ -27,14 +19,16 @@ function Login() {
   const [isSignUp, setIsSignup] = useState(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const signUpHandler = async () => {
     try {
-      await axios.post(" https://moneyfulpublicpolicy.co.kr/register", {
+      await axios.post(`${process.env.REACT_APP_SERVER_API_URL}/register`, {
         id: inputId,
         password: inputPassword,
         nickname: nickName,
       });
+
       alert(`회원가입이 완료되었습니다.`);
       setIsSignup(false);
       setInputId("");
@@ -59,15 +53,21 @@ function Login() {
   const loginHandler = async () => {
     try {
       const idResponse = await axios.post(
-        "https://moneyfulpublicpolicy.co.kr/login",
+        `${process.env.REACT_APP_SERVER_API_URL}/login`,
         {
           id: inputId,
           password: inputPassword,
         }
       );
       if (idResponse.data.success === true) {
-        navigate("/Home");
+        navigate("/");
       }
+      dispatch(signIn(idResponse));
+      dispatch(signUp(idResponse.data.accessToken));
+      localStorage.setItem("token", idResponse.data.accessToken);
+      localStorage.setItem("userId", idResponse.data.userId);
+      localStorage.setItem("avatar", idResponse.data.avatar);
+      localStorage.setItem("nickname", idResponse.data.nickname);
     } catch (error) {
       alert("아이디 또는 비밀번호가 일치하지 않습니다.");
       setInputId("");
@@ -78,7 +78,7 @@ function Login() {
   return (
     <Warpper>
       <LoginBox>
-        <p>{isSignUp ? "회원가입" : "로그인"}</p>
+        <LoginTitle>{isSignUp ? "회원가입" : "로그인"}</LoginTitle>
         {isSignUp ? (
           <>
             <form>
@@ -107,16 +107,16 @@ function Login() {
                   type="text"
                   placeholder="닉네임을 입력해주세요"
                 />
-                <button
-                  onClick={() => {
-                    setIsSignup(false);
-                    setInputId("");
-                    setInputPassword("");
-                  }}
-                >
-                  로그인
-                </button>
               </InputBox>
+              <Button
+                onClick={() => {
+                  setIsSignup(false);
+                  setInputId("");
+                  setInputPassword("");
+                }}
+              >
+                로그인
+              </Button>
             </form>
           </>
         ) : (
@@ -145,32 +145,32 @@ function Login() {
         )}
 
         {isSignUp ? null : (
-          <>
-            <button
+          <div>
+            <Button
               onClick={() => {
                 loginHandler();
               }}
             >
               로그인
-            </button>
-          </>
+            </Button>
+          </div>
         )}
         {isSignUp ? (
-          <>
-            <button onClick={signUpHandler}>회원가입</button>
-          </>
+          <div>
+            <Button onClick={signUpHandler}>회원가입</Button>
+          </div>
         ) : null}
 
         {isSignUp ? null : (
-          <>
-            <button
+          <div>
+            <Button
               onClick={() => {
                 setIsSignup(true);
               }}
             >
               회원가입
-            </button>
-          </>
+            </Button>
+          </div>
         )}
       </LoginBox>
     </Warpper>

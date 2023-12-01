@@ -8,21 +8,24 @@ import {
   Staddtime,
   StletterContent,
   AvatarImg,
-} from "./StyleComponents";
+} from "../styledComponents/StyleComponents";
 import MainContext from "context/MainContext";
 import { useSelector } from "react-redux";
-import defaultpng from "assts/default.png";
+import testjpg from "assts/test.jpg";
 
 export default function LetterList() {
   const members = useSelector((state) => state.member);
-  const { letter, selectedMember } = useContext(MainContext);
-  const lettersMember = letter.filter(
+  const { letter } = useContext(MainContext);
+  const lettersMember = letter?.filter(
     (letters) => letters.writedTo === members.member
   );
+
+  const nickname = localStorage.getItem("nickname");
+
   return (
     <>
       <Stlist>
-        {lettersMember.length === 0 ? (
+        {lettersMember?.length === 0 ? (
           <Stcard>
             {members.member}의 팬래터가 없습니다. 첫번째 팬레터의 주인공이
             되세요!
@@ -30,8 +33,8 @@ export default function LetterList() {
         ) : (
           <>
             {letter
-              .filter((item) => item.writedTo === members.member)
-              .map((fan) => {
+              ?.filter((item) => item.writedTo === members.member)
+              ?.map((fan) => {
                 return (
                   <Link
                     to={`/Detail/${fan.id}`}
@@ -40,11 +43,11 @@ export default function LetterList() {
                   >
                     <Stcard key={fan.id}>
                       <AvatarImg>
-                        <img src={fan.avatar ?? defaultpng} />
+                        <img src={fan.avatar || testjpg} />
                       </AvatarImg>
 
                       <Stlettercontentbox>
-                        <Stnickname>{fan.nickname}</Stnickname>
+                        <Stnickname>{fan.nickname || nickname}</Stnickname>
                         <br />
                         <Staddtime>
                           {new Date(fan.createdAt).toLocaleDateString("ko", {
