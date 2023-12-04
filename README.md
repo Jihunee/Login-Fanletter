@@ -1,96 +1,82 @@
-# redux 리팩토링
+# redux toolkit 리팩토링
 
-### Member.js라는 스테이트 그룹을 만들어줌
+    import { createSlice } from "@reduxjs/toolkit";
 
-    const KARINA = "카리나";
-    const WINTER = "윈터";
-    const GISELLE = "지젤";
-    const NINGNING = "닝닝";
-
-    export const karina = () => {
-      return {
-        type: KARINA,
-      };
-    };
-    export const winter = () => {
-        return {
-        type: WINTER,
-      };
-    };
-    export const giselle = () => {
-     return {
-        type: GISELLE,
-      };
-    };
-    export const ningning = () => {
-      return {
-        type: NINGNING,
-      };
-    };
-
-    const intialState = {
+    const initialState = {
       member: "카리나",
     };
 
-    const member = (state = intialState, action) => {
-      switch (action.type) {
-        case KARINA:
-          return {
-           member: (state.member = "카리나"),
-          };
-        case WINTER:
-          return {
-            member: (state.member = "윈터"),
-           };
-        case GISELLE:
-          return {
-            member: (state.member = "지젤"),
-          };
-        case NINGNING:
-          return {
-            member: (state.member = "닝닝"),
-          };
-        default:
-          return state;
-       }
-    };
+    const memberSlice = createSlice({
+      name: "member",
+      initialState,
+       reducers: {
+        setMember: (state, action) => {
+          state.member = action.payload;
+        },
+      },
+    });
 
-     export default member;
-
-### Header
-
-         <MemberBtn
-                isSelected={selectedMember === "카리나"}
-                onClick={() => {
-                  dispatch(karina());
-                  setSelectedMember("카리나");
-                }}
-              >
-                카리나
-              </MemberBtn>
-
-🔸헤더에서 젹용하고 페이지를 실행해보니 멤버에 맞게 리스트가 나오질 않아서 letterlist도 수정하였습니다.
-
-    export default function LetterList() {
-      const members = useSelector((state) => state.member);
-      const { letter } = useContext(MainContext);
-      const lettersMember = letter.filter(
-        (letters) => letters.writedTo === members.member
-      );
-      return (
-        <>
-          <Stlist>
-            {lettersMember.length === 0 ? (
-              <Stcard>
-                아직 등록한 팬래터가 없습니다. 첫번째 팬레터의 주인공이 되세요!
-              </Stcard>
-            ) : (
-              <>
-                {letter
-                  .filter((item) => item.writedTo === members.member)
-
-🔸useSelector를 활용하여 member값을 가져와서 리스트에 적용 
+    export default memberSlice.reducer;
+    export const { setMember } = memberSlice.actions;
 
 
+# 로그인 회원가입 try catch문으로 에러 처리(예외 처리)
 
+### 회원가입 예외 처리
+
+    const signUpHandler = async () => {
+        try {
+          await axios.post(`${process.env.REACT_APP_SERVER_API_URL}/register`, {
+            id: inputId,
+            password: inputPassword,
+            nickname: nickName,
+          });
+
+          alert(`회원가입이 완료되었습니다.`);
+          setIsSignup(false);
+          setInputId("");
+          setInputPassword("");
+          setNickName("");
+        } catch (error) {
+          if (inputId === "" || inputPassword === "" || nickName === "") {
+            alert("아이디와 비밀번호 닉네임은 필수 입력 사항입니다.");
+            return false;
+          }
+          if (inputId <= 4 || inputId <= 10) {
+            alert("아이디는 최소 4글자부터 10글자까지입니다.");
+            return false;
+          }
+          if (inputPassword <= 4 || inputPassword <= 15) {
+            alert("비밀번호는 최소 4글자부터 15글자까지입니다.");
+            return false;
+          }
+        }
+      };
+
+### 로그인 예외 처리
+
+    const loginHandler = async () => {
+        try {
+          const idResponse = await axios.post(
+            `${process.env.REACT_APP_SERVER_API_URL}/login`,
+            {
+              id: inputId,
+              password: inputPassword,
+            }
+          );
+           if (idResponse.data.success === true) {
+            navigate("/");
+           }
+          dispatch(signIn(idResponse));
+          dispatch(signUp(idResponse.data.accessToken));
+          localStorage.setItem("token", idResponse.data.accessToken);
+          localStorage.setItem("userId", idResponse.data.userId);
+          localStorage.setItem("avatar", idResponse.data.avatar);
+          localStorage.setItem("nickname", idResponse.data.nickname);
+        } catch (error) {
+          alert("아이디 또는 비밀번호가 일치하지 않습니다.");
+          setInputId("");
+          setInputPassword("");
+        }
+       };
 
