@@ -57,15 +57,6 @@ function Profile({ letter, setLetter }) {
           }
         })
       );
-
-      // 찾은 편지의 ID를 사용하여 업데이트
-      await axios.patch(
-        `${process.env.REACT_APP_SERVER_URL}/letters/${userId}`,
-        {
-          nickname: editedText,
-          avatar: imgfile,
-        }
-      );
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
